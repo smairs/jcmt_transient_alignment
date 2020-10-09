@@ -20,12 +20,22 @@ This public repository is the home for the correlation derived alignment methods
   * if psd is True it will compute the power spectrum of Epoch_1 even if epoch_2 is not None. 
   * if clip_only is True, then the map will only be clipped to a clipped_side by clipped_side square array.
 
-### **gaussian_fit_xc**
+### gaussian_fit_xc
+#### IN:
+#### OUT:
 
-### **gaussian_fit_ac**
+### gaussian_fit_ac
+#### IN:
+#### OUT:
 
-### **fourier_gaussian_function**
+### fourier_gaussian_function
+#### IN:
+#### OUT:
 
-### **amp**
+### amp
+#### IN:
+#### OUT:
 
-### **beam_fit**
+### beam_fit
+#### IN:
+#### OUT:
