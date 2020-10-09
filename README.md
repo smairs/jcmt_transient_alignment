@@ -10,14 +10,14 @@ Correlate:
   * clip_only: True will only clip the map and not correlate it.
   * psd: Generates the Power spectrum which is the Fourier Transform of the Auto-Correlation
    outputs:
-    if epoch_1 is None, the function will raise an exception.
-    if epoch_1 is a 2d array, and epoch_2 is None it will computer the auto-correlation of Epoch_1
-    if Epoch_1 and Epoch_2 are both 2d arrays it will compute the cross-correlation of Epoch 2 to Epoch 1.
-    if psd is True it will compute the power spectrum of Epoch_1 even if epoch_2 is not None. 
-    if clip_only is True, then the map will only be clipped to a clipped_side by clipped_side square array.
+  * if epoch_1 is None, the function will raise an exception.
+  * if epoch_1 is a 2d array, and epoch_2 is None it will computer the auto-correlation of Epoch_1
+  * if Epoch_1 and Epoch_2 are both 2d arrays it will compute the cross-correlation of Epoch 2 to Epoch 1.
+  * if psd is True it will compute the power spectrum of Epoch_1 even if epoch_2 is not None. 
+  * if clip_only is True, then the map will only be clipped to a clipped_side by clipped_side square array.
 
-gaussian_fit_xc
-gaussian_fit_ac
-fourier_gaussian_function
-amp
-beam_fit
+**gaussian_fit_xc**
+**gaussian_fit_ac**
+**fourier_gaussian_function**
+**amp**
+**beam_fit**
