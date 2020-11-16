@@ -26,9 +26,8 @@ def f_linear(p, x):
 # + ===================== +
 # | Root project location |
 # + ===================== +
-LOCAL_ROOT = '/home/cobr/Documents/JCMT/jcmt-trans-align/'
-# external disk root location:
-ROOT = '/media/cobr/JCMT-TRANSIENT/'
+LOCAL_ROOT = '/home/cobr/Documents/JCMT/jcmt-trans-align/'  # location of save file
+ROOT = '/media/cobr/JCMT-TRANSIENT/'  # location of meta-data files
 
 # + ===================== +
 # | Global parameters     |
