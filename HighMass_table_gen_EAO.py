@@ -2,9 +2,10 @@ import pickle
 import numpy as np
 import os
 
-def make_table(regions=['DR21C'])
+def make_table(regions=['DR21C'],alignment_iteration=0)
     """
     :param regions: a list of regions to run
+    :param alignment_iteration: there will be multiple iterations of the alignment run - this 0-based integer designates which alignment iteration the output table describes
     """
     
     REGIONS = {}
@@ -13,7 +14,7 @@ def make_table(regions=['DR21C'])
     
     for region in REGIONS.keys():
     
-        with open("data/data_HM.pickle", 'rb') as data:
+        with open("data/data_HM_run_"+str(alignment_iteration)+".pickle", 'rb') as data:
             data = pickle.load(data)
         data=data[region]
         px2fwhm = 2.355 / np.sqrt(2)
@@ -121,4 +122,4 @@ def make_table(regions=['DR21C'])
             os.system('mkdir tables')
         for val in arr:
             table = np.vstack((np.array(table), np.array(val, dtype=str)))
-        np.savetxt("tables/HM_{:}.table".format(region), np.array(table)[1:].T, fmt="%s", header=hdr)
+        np.savetxt("tables/HM_"+region+"_run_"+str(alignment_iteration)+".table", np.array(table)[1:].T, fmt="%s", header=hdr)

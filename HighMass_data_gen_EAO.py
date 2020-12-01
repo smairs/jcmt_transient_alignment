@@ -1,3 +1,4 @@
+from datetime import datetime
 import numpy as np
 import numpy.ma as ma
 #import seaborn as sns
@@ -261,11 +262,13 @@ def beam_fit(sigma, power_spectrum, required_length_scale):
     return abs(dif)
 
 
-def make_data_dict(DIST=7,length=200,regions=['DR21C'],kernel_sigma=6):
+def make_data_dict(regions=['DR21C'],datadirs=['DR21C'],alignment_iteration=0,DIST=7,length=200,kernel_sigma=6):
     """
+    :param regions: a list of regions to run
+    :param datadirs: a list of directories that hold the data for each region listed in parameter regions.
+    :param alignment_iteration: there will be multiple iterations of the alignment run - this 0-based integer designates which alignment iteration the output file describes
     :param DIST: the distance used for linear fitting and gaussian fitting (use width = RADIUS*2 + 1)
     :param length: the distance used for linear fitting and gaussian fitting (use width = RADIUS*2 + 1)
-    :param regions: a list of regions to run
     :param kernel_sigma: the smoothing kernel (in pixels) to subtract largescale structure (high pass filter)
     """
     # + ===================== +
@@ -282,11 +285,11 @@ def make_data_dict(DIST=7,length=200,regions=['DR21C'],kernel_sigma=6):
     
     data = defaultdict(dict)
     
-    for region in list(REGIONS.keys()):
+    for region,datadirs in zip(regions,datadirs):
         data[region] = defaultdict(dict)
         Dates850 = []
         Dates450 = []
-        DataRoot = region + "/"  # where all the data is stored
+        DataRoot = datadir + "/"  # where all the data is stored
         files = [f for f in os.listdir(DataRoot) if (os.path.isfile(os.path.join(DataRoot, f)) and
                                                      os.path.join(DataRoot, f)[-4:] ==".sdf")]  # all the files in dir
         files = sorted(files)  # sorting to ensure we select the correct first region
@@ -457,5 +460,5 @@ def make_data_dict(DIST=7,length=200,regions=['DR21C'],kernel_sigma=6):
     data = default_to_regular(data)
     if not os.path.exists('data'):
         os.system('mkdir data')
-    with open('data/data_HM.pickle', 'wb') as OUT:
+    with open('data/data_HM_run_'+str(alignment_iteration)+'.pickle', 'wb') as OUT:
         pickle.dump(data, OUT)
