@@ -455,5 +455,7 @@ def make_data_dict(DIST=7,length=200,regions=['DR21C'],kernel_sigma=6):
     
     
     data = default_to_regular(data)
+    if not os.path.exists('data'):
+        os.system('mkdir data')
     with open('data/data_HM.pickle', 'wb') as OUT:
         pickle.dump(data, OUT)

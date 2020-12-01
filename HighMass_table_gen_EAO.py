@@ -1,5 +1,6 @@
 import pickle
 import numpy as np
+import os
 
 def make_table(regions=['DR21C'])
     """
@@ -116,6 +117,8 @@ def make_table(regions=['DR21C'])
                ]
     
         table = np.array(np.zeros(len(key)))
+        if not os.path.exists('tables'):
+            os.system('mkdir tables')
         for val in arr:
             table = np.vstack((np.array(table), np.array(val, dtype=str)))
         np.savetxt("tables/HM_{:}.table".format(region), np.array(table)[1:].T, fmt="%s", header=hdr)
