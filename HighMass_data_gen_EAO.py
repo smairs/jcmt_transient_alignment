@@ -262,7 +262,7 @@ def beam_fit(sigma, power_spectrum, required_length_scale):
     return abs(dif)
 
 
-def make_data_dict(regions=['DR21C'],datadirs=['DR21C'],alignment_iteration=0,DIST=7,length=200,kernel_sigma=6):
+def make_data_dict(regions=['DR21C'],datadirs=['DR21C'],alignment_iteration=0,DIST=7,length=200,kernel_sigma=6,wavelength = '850'):
     """
     :param regions: a list of regions to run
     :param datadirs: a list of directories that hold the data for each region listed in parameter regions.
@@ -278,9 +278,8 @@ def make_data_dict(regions=['DR21C'],datadirs=['DR21C'],alignment_iteration=0,DI
     
     REGIONS = {}
     for i in regions:
-        REGIONS[i] = {"450":1,"850":1}
+        REGIONS[i] = {wavelength:1}
 
-    wavelengths = ['450', '850']
     align_smooth_kernel = Gaussian2DKernel(kernel_sigma)#, x_stddev=kernel_sigma, y_stddev=kernel_sigma)
     
     data = defaultdict(dict)
@@ -294,171 +293,170 @@ def make_data_dict(regions=['DR21C'],datadirs=['DR21C'],alignment_iteration=0,DI
                                                      os.path.join(DataRoot, f)[-4:] ==".sdf")]  # all the files in dir
         files = sorted(files)  # sorting to ensure we select the correct first region
     
-        for wavelength in wavelengths:
-            if wavelength == '450':
-                scale = 2
-            elif wavelength == '850':
-                scale = 3
-            else:
-                scale = 0
-            data[region][wavelength] = defaultdict(dict)
-            data[region][wavelength]['epoch'] = defaultdict(list)
+        if wavelength == '450':
+            scale = 2
+        elif wavelength == '850':
+            scale = 3
+        else:
+            scale = 0
+        data[region][wavelength] = defaultdict(dict)
+        data[region][wavelength]['epoch'] = defaultdict(list)
     
-            data[region][wavelength]['dates'] = list()  # to collect all of the dates in the data[region] set
-            data[region][wavelength]['JCMT_offset'] = defaultdict(str)  # to use the date as the index
-            data[region][wavelength]['header'] = defaultdict(dict)
+        data[region][wavelength]['dates'] = list()  # to collect all of the dates in the data[region] set
+        data[region][wavelength]['JCMT_offset'] = defaultdict(str)  # to use the date as the index
+        data[region][wavelength]['header'] = defaultdict(dict)
     
-            data[region][wavelength]['XC'] = defaultdict(dict)
-            data[region][wavelength]['XC']['offset'] = defaultdict(list)
-            data[region][wavelength]['XC']['offset_err'] = defaultdict(list)
-            data[region][wavelength]['XC']['alignment'] = defaultdict(list)
+        data[region][wavelength]['XC'] = defaultdict(dict)
+        data[region][wavelength]['XC']['offset'] = defaultdict(list)
+        data[region][wavelength]['XC']['offset_err'] = defaultdict(list)
+        data[region][wavelength]['XC']['alignment'] = defaultdict(list)
     
-            data[region][wavelength]['linear'] = defaultdict(dict)
-            data[region][wavelength]['linear']['m'] = defaultdict(dict)
-            data[region][wavelength]['linear']['m_err'] = defaultdict(dict)
-            data[region][wavelength]['linear']['b'] = defaultdict(dict)
-            data[region][wavelength]['linear']['b_err'] = defaultdict(dict)
+        data[region][wavelength]['linear'] = defaultdict(dict)
+        data[region][wavelength]['linear']['m'] = defaultdict(dict)
+        data[region][wavelength]['linear']['m_err'] = defaultdict(dict)
+        data[region][wavelength]['linear']['b'] = defaultdict(dict)
+        data[region][wavelength]['linear']['b_err'] = defaultdict(dict)
     
-            data[region][wavelength]['AC'] = defaultdict(dict)
-            data[region][wavelength]['AC']['beam'] = defaultdict(list)
-            data[region][wavelength]['AC']['amp'] = defaultdict(list)
-            data[region][wavelength]['AC']['amp_err'] = defaultdict(list)
-            data[region][wavelength]['AC']['sig_x'] = defaultdict(list)
-            data[region][wavelength]['AC']['sig_x_err'] = defaultdict(list)
-            data[region][wavelength]['AC']['sig_y'] = defaultdict(list)
-            data[region][wavelength]['AC']['sig_y_err'] = defaultdict(list)
-            data[region][wavelength]['AC']['theta'] = defaultdict(list)
-            data[region][wavelength]['AC']['theta_err'] = defaultdict(list)
-            if wavelength == '450':
-                index = 0
-            else:
-                index = 1
+        data[region][wavelength]['AC'] = defaultdict(dict)
+        data[region][wavelength]['AC']['beam'] = defaultdict(list)
+        data[region][wavelength]['AC']['amp'] = defaultdict(list)
+        data[region][wavelength]['AC']['amp_err'] = defaultdict(list)
+        data[region][wavelength]['AC']['sig_x'] = defaultdict(list)
+        data[region][wavelength]['AC']['sig_x_err'] = defaultdict(list)
+        data[region][wavelength]['AC']['sig_y'] = defaultdict(list)
+        data[region][wavelength]['AC']['sig_y_err'] = defaultdict(list)
+        data[region][wavelength]['AC']['theta'] = defaultdict(list)
+        data[region][wavelength]['AC']['theta_err'] = defaultdict(list)
+        if wavelength == '450':
+            index = 0
+        else:
+            index = 1
     
-            FEN = files[index]
-            FilePath = region + "/" + FEN
-            OutPath = region + "/" + FEN[1:-4] + ".fit"
-            if os.path.isfile(OutPath):
-                pass
-            else:
-                convert.ndf2fits(FilePath, OutPath)
-            FilePath = OutPath
-            FirstEpoch = fits.open(FilePath)  # opening the file in astropy
-            FirstEpochData = FirstEpoch[0].data[0]  # Numpy data array for the first epoch
-            FirstEpochCentre = np.array([FirstEpoch[0].header['CRPIX1'], FirstEpoch[0].header['CRPIX2']])
+        FEN = files[index]
+        FilePath = region + "/" + FEN
+        OutPath = region + "/" + FEN[1:-4] + ".fit"
+        if os.path.isfile(OutPath):
+            pass
+        else:
+            convert.ndf2fits(FilePath, OutPath)
+        FilePath = OutPath
+        FirstEpoch = fits.open(FilePath)  # opening the file in astropy
+        FirstEpochData = FirstEpoch[0].data[0]  # Numpy data array for the first epoch
+        FirstEpochCentre = np.array([FirstEpoch[0].header['CRPIX1'], FirstEpoch[0].header['CRPIX2']])
     
-            # middle of the map of the first epoch
-            FED_MidMapX = FirstEpochData.shape[1] // 2
-            FED_MidMapY = FirstEpochData.shape[0] // 2
-            FirstEpochVec = np.array([FirstEpochCentre[0] - FED_MidMapX,
-                                      FirstEpochCentre[1] - FED_MidMapY])
-            FirstEpochData = FirstEpochData[
-                             FED_MidMapY - length:FED_MidMapY + length + 1,
-                             FED_MidMapX - length:FED_MidMapX + length + 1]
-            FirstEpochData_smooth = convolve(FirstEpochData, align_smooth_kernel, normalize_kernel=False)
-            FirstEpochData -= FirstEpochData_smooth
-            for fn in files:
-                if wavelength in fn:
-                    FilePath = region + "/" + fn
+        # middle of the map of the first epoch
+        FED_MidMapX = FirstEpochData.shape[1] // 2
+        FED_MidMapY = FirstEpochData.shape[0] // 2
+        FirstEpochVec = np.array([FirstEpochCentre[0] - FED_MidMapX,
+                                  FirstEpochCentre[1] - FED_MidMapY])
+        FirstEpochData = FirstEpochData[
+                         FED_MidMapY - length:FED_MidMapY + length + 1,
+                         FED_MidMapX - length:FED_MidMapX + length + 1]
+        FirstEpochData_smooth = convolve(FirstEpochData, align_smooth_kernel, normalize_kernel=False)
+        FirstEpochData -= FirstEpochData_smooth
+        for fn in files:
+            if wavelength in fn:
+                FilePath = region + "/" + fn
     
-                    tau225_start = float(kappa.fitsval(FilePath, 'WVMTAUST').value)
-                    tau225_end = float(kappa.fitsval(FilePath, 'WVMTAUEN').value)
-                    tau225 = sum([tau225_start, tau225_end]) / 2
+                tau225_start = float(kappa.fitsval(FilePath, 'WVMTAUST').value)
+                tau225_end = float(kappa.fitsval(FilePath, 'WVMTAUEN').value)
+                tau225 = sum([tau225_start, tau225_end]) / 2
     
-                    AirMass_start = float(kappa.fitsval(FilePath, 'AMSTART').value)
-                    AirMass_end = float(kappa.fitsval(FilePath, 'AMEND').value)
-                    AirMass = sum([AirMass_start, AirMass_end]) / 2
+                AirMass_start = float(kappa.fitsval(FilePath, 'AMSTART').value)
+                AirMass_end = float(kappa.fitsval(FilePath, 'AMEND').value)
+                AirMass = sum([AirMass_start, AirMass_end]) / 2
     
-                    elev_start = float(kappa.fitsval(FilePath, 'ELSTART').value)
-                    elev_end = float(kappa.fitsval(FilePath, 'ELEND').value)
-                    elev = int(round(sum([elev_start, elev_end]) / 2, 0))
+                elev_start = float(kappa.fitsval(FilePath, 'ELSTART').value)
+                elev_end = float(kappa.fitsval(FilePath, 'ELEND').value)
+                elev = int(round(sum([elev_start, elev_end]) / 2, 0))
     
-                    OutPath = region + "/" + fn[:-4] + ".fit"
+                OutPath = region + "/" + fn[:-4] + ".fit"
     
-                    if os.path.isfile(OutPath):
-                        pass
-                    else:
-                        convert.ndf2fits(FilePath, OutPath)
+                if os.path.isfile(OutPath):
+                    pass
+                else:
+                    convert.ndf2fits(FilePath, OutPath)
     
-                    FilePath = OutPath
-                    hdul = fits.open(FilePath)  # opening the file in astropy
-                    date = ''.join(str(hdul[0].header['DATE-OBS']).split('T')[0].split('-'))  # extract date from the header
-                    date += '-' + str(hdul[0].header['OBSNUM'])
-                    JulianDate = str(float(hdul[0].header['MJD-OBS']) + 2400000.5)
-                    print('Epoch: {:14}'.format(date))
-                    data[region][wavelength]['header']['airmass'][date] = AirMass
-                    data[region][wavelength]['header']['t225'][date] = tau225
-                    data[region][wavelength]['header']['julian_date'][date] = JulianDate
-                    data[region][wavelength]['header']['elevation'][date] = elev
-                    data[region][wavelength]['dates'].append(date)
-                    centre = (hdul[0].header['CRPIX1'], hdul[0].header['CRPIX2'])  # JCMT's alleged centre is
-                    hdu = hdul[0]  # a nice compact way to store the data for later.
+                FilePath = OutPath
+                hdul = fits.open(FilePath)  # opening the file in astropy
+                date = ''.join(str(hdul[0].header['DATE-OBS']).split('T')[0].split('-'))  # extract date from the header
+                date += '-' + str(hdul[0].header['OBSNUM'])
+                JulianDate = str(float(hdul[0].header['MJD-OBS']) + 2400000.5)
+                print('Epoch: {:14}'.format(date))
+                data[region][wavelength]['header']['airmass'][date] = AirMass
+                data[region][wavelength]['header']['t225'][date] = tau225
+                data[region][wavelength]['header']['julian_date'][date] = JulianDate
+                data[region][wavelength]['header']['elevation'][date] = elev
+                data[region][wavelength]['dates'].append(date)
+                centre = (hdul[0].header['CRPIX1'], hdul[0].header['CRPIX2'])  # JCMT's alleged centre is
+                hdu = hdul[0]  # a nice compact way to store the data for later.
     
-                    # data[region][wavelength]['epoch'][date].append(hdu)o
-                    Epoch = hdu.data[0]  # map of the region
-                    Map_of_Region = interpolate_replace_nans(correlate(Epoch, clip_only=True),
-                                                             Gaussian2DKernel(5))
-                    Map_of_Region_smooth = convolve(Map_of_Region, align_smooth_kernel, normalize_kernel=False)
-                    Map_of_RegionXC = Map_of_Region - Map_of_Region_smooth
+                # data[region][wavelength]['epoch'][date].append(hdu)o
+                Epoch = hdu.data[0]  # map of the region
+                Map_of_Region = interpolate_replace_nans(correlate(Epoch, clip_only=True),
+                                                         Gaussian2DKernel(5))
+                Map_of_Region_smooth = convolve(Map_of_Region, align_smooth_kernel, normalize_kernel=False)
+                Map_of_RegionXC = Map_of_Region - Map_of_Region_smooth
     
-                    XC = correlate(epoch_1=Map_of_RegionXC, epoch_2=FirstEpochData).real
-                    PS = correlate(Map_of_Region, psd=True)
-                    AC = correlate(Map_of_Region).real  # auto correlation of the map
-                    centre = (hdul[0].header['CRPIX1'], hdul[0].header['CRPIX2'])  # JCMT's alleged centre is
-                    Vec = np.array([centre[0] - (hdul[0].shape[2] // 2),
-                                    centre[1] - (hdul[0].shape[1] // 2)])
-                    JCMT_offset = FirstEpochVec - Vec  # JCMT offset from headers
-                    data[region][wavelength]['JCMT_offset'][date] = JCMT_offset  # used for accessing data later.
+                XC = correlate(epoch_1=Map_of_RegionXC, epoch_2=FirstEpochData).real
+                PS = correlate(Map_of_Region, psd=True)
+                AC = correlate(Map_of_Region).real  # auto correlation of the map
+                centre = (hdul[0].header['CRPIX1'], hdul[0].header['CRPIX2'])  # JCMT's alleged centre is
+                Vec = np.array([centre[0] - (hdul[0].shape[2] // 2),
+                                centre[1] - (hdul[0].shape[1] // 2)])
+                JCMT_offset = FirstEpochVec - Vec  # JCMT offset from headers
+                data[region][wavelength]['JCMT_offset'][date] = JCMT_offset  # used for accessing data later.
     
-                    [[AMP, SIGX, SIGY, THETA], [AMP_ERR, SIGX_ERR, SIGY_ERR, THETA_ERR]], _ = gaussian_fit_ac(AC)
-                    offset, offset_err = gaussian_fit_xc(XC)
-                    alignment = JCMT_offset - offset
-                    Length_Scale = np.sqrt(SIGX * SIGY)
+                [[AMP, SIGX, SIGY, THETA], [AMP_ERR, SIGX_ERR, SIGY_ERR, THETA_ERR]], _ = gaussian_fit_ac(AC)
+                offset, offset_err = gaussian_fit_xc(XC)
+                alignment = JCMT_offset - offset
+                Length_Scale = np.sqrt(SIGX * SIGY)
     
-                    data[region][wavelength]['XC']['offset'][date] = offset * scale
-                    data[region][wavelength]['XC']['offset_err'][date] = offset_err
-                    data[region][wavelength]['XC']['alignment'][date] = alignment
+                data[region][wavelength]['XC']['offset'][date] = offset * scale
+                data[region][wavelength]['XC']['offset_err'][date] = offset_err
+                data[region][wavelength]['XC']['alignment'][date] = alignment
     
-                    data[region][wavelength]['AC']['beam'][date] = Length_Scale
-                    data[region][wavelength]['AC']['amp'][date] = AMP
-                    data[region][wavelength]['AC']['amp_err'][date] = AMP_ERR
-                    data[region][wavelength]['AC']['sig_x'][date] = SIGX
-                    data[region][wavelength]['AC']['sig_x_err'][date] = SIGX_ERR
-                    data[region][wavelength]['AC']['sig_y'][date] = SIGY
-                    data[region][wavelength]['AC']['sig_y_err'][date] = SIGY_ERR
-                    data[region][wavelength]['AC']['theta'][date] = THETA
-                    data[region][wavelength]['AC']['theta_err'][date] = THETA_ERR
+                data[region][wavelength]['AC']['beam'][date] = Length_Scale
+                data[region][wavelength]['AC']['amp'][date] = AMP
+                data[region][wavelength]['AC']['amp_err'][date] = AMP_ERR
+                data[region][wavelength]['AC']['sig_x'][date] = SIGX
+                data[region][wavelength]['AC']['sig_x_err'][date] = SIGX_ERR
+                data[region][wavelength]['AC']['sig_y'][date] = SIGY
+                data[region][wavelength]['AC']['sig_y_err'][date] = SIGY_ERR
+                data[region][wavelength]['AC']['theta'][date] = THETA
+                data[region][wavelength]['AC']['theta_err'][date] = THETA_ERR
     
-                    Clipped_Map_of_Region_LENGTH = np.arange(0, Map_of_Region.shape[0])
-                    loc = list(product(Clipped_Map_of_Region_LENGTH, Clipped_Map_of_Region_LENGTH))
-                    MidMapX = AC.shape[1] // 2  # middle of the map x
-                    MidMapY = AC.shape[0] // 2  # and y
-                    radius, AC_pows = [], []
-                    for idx in loc:  # Determining the power at a certain radius
-                        r = ((idx[0] - MidMapX) ** 2 + (idx[1] - MidMapY) ** 2) ** (1 / 2)
-                        AC_pow = AC[idx[0], idx[1]].real
-                        radius.append(r)
-                        AC_pows.append(AC_pow)
-                    radius, AC_pows = zip(*sorted(list(zip(radius, AC_pows)), key=op.itemgetter(0)))
-                    radius = np.array(radius)
-                    AC_pows = np.array(AC_pows)
+                Clipped_Map_of_Region_LENGTH = np.arange(0, Map_of_Region.shape[0])
+                loc = list(product(Clipped_Map_of_Region_LENGTH, Clipped_Map_of_Region_LENGTH))
+                MidMapX = AC.shape[1] // 2  # middle of the map x
+                MidMapY = AC.shape[0] // 2  # and y
+                radius, AC_pows = [], []
+                for idx in loc:  # Determining the power at a certain radius
+                    r = ((idx[0] - MidMapX) ** 2 + (idx[1] - MidMapY) ** 2) ** (1 / 2)
+                    AC_pow = AC[idx[0], idx[1]].real
+                    radius.append(r)
+                    AC_pows.append(AC_pow)
+                radius, AC_pows = zip(*sorted(list(zip(radius, AC_pows)), key=op.itemgetter(0)))
+                radius = np.array(radius)
+                AC_pows = np.array(AC_pows)
     
-                    num = len(radius[np.where(radius <= DIST)])
-                    opt_fit_AC, cov_mat_AC = curve_fit(f, radius[1:num], AC_pows[1:num])
-                    err = np.sqrt(np.diag(cov_mat_AC))
+                num = len(radius[np.where(radius <= DIST)])
+                opt_fit_AC, cov_mat_AC = curve_fit(f, radius[1:num], AC_pows[1:num])
+                err = np.sqrt(np.diag(cov_mat_AC))
     
-                    M = opt_fit_AC[0]
-                    M_err = err[0]
-                    B = opt_fit_AC[1]
-                    B_err = err[1]
+                M = opt_fit_AC[0]
+                M_err = err[0]
+                B = opt_fit_AC[1]
+                B_err = err[1]
     
-                    data[region][wavelength]['linear']['m'][date] = M
-                    data[region][wavelength]['linear']['m_err'][date] = M_err
-                    data[region][wavelength]['linear']['b'][date] = B
-                    data[region][wavelength]['linear']['b_err'][date] = B_err
+                data[region][wavelength]['linear']['m'][date] = M
+                data[region][wavelength]['linear']['m_err'][date] = M_err
+                data[region][wavelength]['linear']['b'][date] = B
+                data[region][wavelength]['linear']['b_err'][date] = B_err
     
     
     data = default_to_regular(data)
     if not os.path.exists('data'):
         os.system('mkdir data')
-    with open('data/data_HM_run_'+str(alignment_iteration)+'.pickle', 'wb') as OUT:
+    with open('data/data_Transient_run_'+str(alignment_iteration)+'_'+wavelength+'.pickle', 'wb') as OUT:
         pickle.dump(data, OUT)

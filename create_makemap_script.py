@@ -4,12 +4,16 @@ import glob
 
 def make_pcor(tablefile):
 
+    # We only want to use 850 microns for the alignment!! If a 450 table is supplied - change it to 850 for this function!
+    if tablefile.split('_')[-1]=='450.table':
+        tablefile=tablefile.split('_450.table')[0]+'_850.table'
+
     table = np.genfromtxt(tablefile,dtype=None,names=True)
 
     for eachdate,eachdx,eachdy in zip(table['Key'],table['dx'],table['dy']):
         if not np.logical_and(str(eachdx)==str(0.0),str(eachdy)==str(0.0)):
             eachdatestr = eachdate.decode('utf-8')
-            pcorfile = open(tablefile.split('_')[1].split('.table')[0]+'_'+eachdatestr.split('-')[0]+'_'+eachdatestr.split('-')[1].zfill(5)+'_pcor.txt','w')
+            pcorfile = open(tablefile.split('_')[1]+'_'+eachdatestr.split('-')[0]+'_'+eachdatestr.split('-')[1].zfill(5)+'_pcor.txt','w')
             pcorfile.write('#SYSTEM=TRACKING\n')
             pcorfile.write('#TAI DLON DLAT\n')
             pcorfile.write('1 '+str(eachdx)+' '+str(eachdy)+'\n')
