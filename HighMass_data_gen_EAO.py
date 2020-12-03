@@ -284,7 +284,7 @@ def make_data_dict(regions=['DR21C'],datadirs=['DR21C'],alignment_iteration=0,DI
     
     data = defaultdict(dict)
     
-    for region,datadirs in zip(regions,datadirs):
+    for region,datadir in zip(regions,datadirs):
         data[region] = defaultdict(dict)
         Dates850 = []
         Dates450 = []

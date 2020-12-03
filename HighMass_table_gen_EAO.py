@@ -2,7 +2,7 @@ import pickle
 import numpy as np
 import os
 
-def make_table(regions=['DR21C'],alignment_iteration=0,wavelength='850')
+def make_table(regions=['DR21C'],alignment_iteration=0,wavelength='850'):
     """
     :param regions: a list of regions to run
     :param alignment_iteration: there will be multiple iterations of the alignment run - this 0-based integer designates which alignment iteration the output table describes

@@ -11,6 +11,7 @@ def make_pcor(tablefile):
     table = np.genfromtxt(tablefile,dtype=None,names=True)
 
     for eachdate,eachdx,eachdy in zip(table['Key'],table['dx'],table['dy']):
+        print('PCOR FILE: ',eachdx,eachdy)
         if not np.logical_and(str(eachdx)==str(0.0),str(eachdy)==str(0.0)):
             eachdatestr = eachdate.decode('utf-8')
             pcorfile = open(tablefile.split('_')[1]+'_'+eachdatestr.split('-')[0]+'_'+eachdatestr.split('-')[1].zfill(5)+'_pcor.txt','w')
@@ -25,7 +26,7 @@ def makemap_infiles(region,wave):
     for eachpcorfile in sorted(glob.glob('*pcor.txt')):
         date = eachpcorfile.split('_')[-3]
         scan = eachpcorfile.split('_')[-2]
-        os.system('ls -1d /jcmtdata/raw/scuba2/s'+wave[0]+'*/'+date+'/'+scan+'/*sdf > '+region+'_'+date+'_'+scan+'_'+wave+'.txt'
+        os.system('ls -1d /jcmtdata/raw/scuba2/s'+wave[0]+'*/'+date+'/'+scan+'/*sdf > '+region+'_'+date+'_'+scan+'_'+wave+'.txt')
 
 def create_makemap_script(wave):
     with open('makemaps.sh','w') as makemapsscript:
@@ -33,11 +34,11 @@ def create_makemap_script(wave):
         makemapsscript.write('# Run makemap with pointing corrections - calibrate them and crop them\n')
         makemapsscript.write('# User-defined variables on which maps to reduce\n')
         makemapsscript.write('WAVES='+wave+'\n')
-        makemapsscript.write('INFILES=*$WAVE.txt\n')
         makemapsscript.write('STARLINK_DIR=/stardev\n')
         makemapsscript.write('ORAC_DIR=/stardev/bin/oracdr/src\n')
         makemapsscript.write('for WAVE in $WAVES\n')
         makemapsscript.write('  do\n')
+        makemapsscript.write('    INFILES=*$WAVE.txt\n')
         makemapsscript.write('    # Select proper pixel size\n')
         makemapsscript.write('    if [[ "$WAVE" == 850 ]]; then\n')
         makemapsscript.write('      pixsize=3\n')
