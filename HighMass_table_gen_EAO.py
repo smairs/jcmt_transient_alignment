@@ -45,8 +45,8 @@ def make_table(regions=['DR21C'],alignment_iteration=0,wavelength='850'):
             SIGY_err_850 = np.array(list(data['850']['AC']['sig_y_err'].values()), dtype=float)[np.argsort(keyarray)].T
             THETA_850 = np.array(list(data['850']['AC']['theta'].values()), dtype=float)[np.argsort(keyarray)].T
             THETA_err_850 = np.array(list(data['850']['AC']['theta_err'].values()), dtype=float)[np.argsort(keyarray)].T
-            dx = np.array(list(data['850']['XC']['alignment'].values()), dtype=float)[np.argsort(keyarray)].T[0][0] * 3
-            dy = np.array(list(data['850']['XC']['alignment'].values()), dtype=float)[np.argsort(keyarray)].T[0][1] * 3
+            dx = np.array(list(data['850']['XC']['alignment'].values()), dtype=float)[np.argsort(keyarray)].T[0] * 3
+            dy = np.array(list(data['850']['XC']['alignment'].values()), dtype=float)[np.argsort(keyarray)].T[1] * 3
             key = np.array(sorted(list(data[wavelength]['header']['airmass'].keys())), dtype=str).T
 
             cal_measure_850 = np.sqrt(-M_850)
@@ -73,7 +73,6 @@ def make_table(regions=['DR21C'],alignment_iteration=0,wavelength='850'):
                    AMP_850, AMP_err_850, SIGX_850, SIGX_err_850, SIGY_850, SIGY_err_850, THETA_850, THETA_err_850,
                    ]
 
-    
         elif wavelength == '450':
             M_450 = np.array(list(data['450']['linear']['m'].values()), dtype=float)[np.argsort(keyarray)].T
             M_err_450 = np.array(list(data['450']['linear']['m_err'].values()), dtype=float)[np.argsort(keyarray)].T
@@ -91,8 +90,8 @@ def make_table(regions=['DR21C'],alignment_iteration=0,wavelength='850'):
             SIGY_err_450 = np.array(list(data['450']['AC']['sig_y_err'].values()), dtype=float)[np.argsort(keyarray)].T
             THETA_450 = np.array(list(data['450']['AC']['theta'].values()), dtype=float)[np.argsort(keyarray)].T
             THETA_err_450 = np.array(list(data['450']['AC']['theta_err'].values()), dtype=float)[np.argsort(keyarray)].T
-            dx450 = np.array(list(data['450']['XC']['alignment'].values()), dtype=float)[np.argsort(keyarray)].T[0][0] * 2
-            dy450 = np.array(list(data['450']['XC']['alignment'].values()), dtype=float)[np.argsort(keyarray)].T[0][1] * 2
+            dx450 = np.array(list(data['450']['XC']['alignment'].values()), dtype=float)[np.argsort(keyarray)].T[0] * 2
+            dy450 = np.array(list(data['450']['XC']['alignment'].values()), dtype=float)[np.argsort(keyarray)].T[1] * 2
             key = np.array(sorted(list(data[wavelength]['header']['airmass'].keys())), dtype=str).T
 
             M_450[M_450 > 0] = -0.0001

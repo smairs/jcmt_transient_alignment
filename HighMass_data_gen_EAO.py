@@ -280,7 +280,7 @@ def make_data_dict(regions=['DR21C'],datadirs=['DR21C'],alignment_iteration=0,DI
     for i in regions:
         REGIONS[i] = {wavelength:1}
 
-    align_smooth_kernel = Gaussian2DKernel(kernel_sigma)#, x_stddev=kernel_sigma, y_stddev=kernel_sigma)
+    align_smooth_kernel = Gaussian2DKernel(x_stddev=kernel_sigma, y_stddev=kernel_sigma)
     
     data = defaultdict(dict)
     
@@ -289,8 +289,14 @@ def make_data_dict(regions=['DR21C'],datadirs=['DR21C'],alignment_iteration=0,DI
         Dates850 = []
         Dates450 = []
         DataRoot = datadir + "/"  # where all the data is stored
-        files = [f for f in os.listdir(DataRoot) if (os.path.isfile(os.path.join(DataRoot, f)) and
-                                                     os.path.join(DataRoot, f)[-4:] ==".sdf")]  # all the files in dir
+        files = []
+        for eachfile in os.listdir(DataRoot):
+            if os.path.isfile(os.path.join(DataRoot, eachfile)):
+                if eachfile.split('.')[-1] == 'sdf':
+                    if wavelength in eachfile:
+                        files.append(eachfile)
+        #files = [f for f in os.listdir(DataRoot) if (os.path.isfile(os.path.join(DataRoot, f)) and
+        #                                             os.path.join(DataRoot, f)[-4:] ==".sdf")]  # all the files in dir for this wavelength
         files = sorted(files)  # sorting to ensure we select the correct first region
     
         if wavelength == '450':
@@ -327,14 +333,11 @@ def make_data_dict(regions=['DR21C'],datadirs=['DR21C'],alignment_iteration=0,DI
         data[region][wavelength]['AC']['sig_y_err'] = defaultdict(list)
         data[region][wavelength]['AC']['theta'] = defaultdict(list)
         data[region][wavelength]['AC']['theta_err'] = defaultdict(list)
-        if wavelength == '450':
-            index = 0
-        else:
-            index = 1
+        
     
-        FEN = files[index]
-        FilePath = region + "/" + FEN
-        OutPath = region + "/" + FEN[1:-4] + ".fit"
+        FEN = files[0]
+        FilePath = datadir + "/" + FEN
+        OutPath = datadir + "/" + FEN.split('.sdf')[0] + ".fit"
         if os.path.isfile(OutPath):
             pass
         else:
@@ -356,7 +359,7 @@ def make_data_dict(regions=['DR21C'],datadirs=['DR21C'],alignment_iteration=0,DI
         FirstEpochData -= FirstEpochData_smooth
         for fn in files:
             if wavelength in fn:
-                FilePath = region + "/" + fn
+                FilePath = datadir + "/" + fn
     
                 tau225_start = float(kappa.fitsval(FilePath, 'WVMTAUST').value)
                 tau225_end = float(kappa.fitsval(FilePath, 'WVMTAUEN').value)
@@ -370,7 +373,7 @@ def make_data_dict(regions=['DR21C'],datadirs=['DR21C'],alignment_iteration=0,DI
                 elev_end = float(kappa.fitsval(FilePath, 'ELEND').value)
                 elev = int(round(sum([elev_start, elev_end]) / 2, 0))
     
-                OutPath = region + "/" + fn[:-4] + ".fit"
+                OutPath = datadir + "/" + fn[:-4] + ".fit"
     
                 if os.path.isfile(OutPath):
                     pass
