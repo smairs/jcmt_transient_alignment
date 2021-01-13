@@ -13,13 +13,15 @@ def make_pcor(tablefile):
     for eachdate,eachdx,eachdy in zip(table['Key'],table['dx'],table['dy']):
         print('PCOR FILE: ',eachdx,eachdy)
         if not np.logical_and(str(eachdx)==str(0.0),str(eachdy)==str(0.0)):
-            eachdatestr = eachdate.decode('utf-8')
-            pcorfile = open(tablefile.split('_')[1]+'_'+eachdatestr.split('-')[0]+'_'+eachdatestr.split('-')[1].zfill(5)+'_pcor.txt','w')
-            pcorfile.write('#SYSTEM=TRACKING\n')
-            pcorfile.write('#TAI DLON DLAT\n')
-            pcorfile.write('1 '+str(eachdx)+' '+str(eachdy)+'\n')
-            pcorfile.write('10000000 '+str(eachdx)+' '+str(eachdy))
-            pcorfile.close()
+            if not np.logical_and(str(eachdx)==str(-0.0),str(eachdy)==str(0.0)):
+                eachdatestr = eachdate.decode('utf-8')
+                pcorfile = open(tablefile.split('_')[1]+'_'+eachdatestr.split('-')[0]+'_'+eachdatestr.split('-')[1].zfill(5)+'_pcor.txt','w')
+                pcorfile.write('#SYSTEM=TRACKING\n')
+                pcorfile.write('#TAI DLON DLAT\n')
+                pcorfile.write('1 '+str(eachdx)+' '+str(eachdy)+'\n')
+                pcorfile.write('10000000 '+str(eachdx)+' '+str(eachdy))
+                pcorfile.close()
+                print('POINTING FOR '+eachdate.decode('utf-8')+': '+str(eachdx)+', '+str(eachdy))
 
 def makemap_infiles(region,wave):
 

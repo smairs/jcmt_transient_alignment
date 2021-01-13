@@ -13,7 +13,15 @@ def make_table(regions=['DR21C'],alignment_iteration=0,wavelength='850'):
         REGIONS[i] = {wavelength:1}
     
     for region in REGIONS.keys():
-    
+   
+        if os.path.exists('tables/Transient_'+region+'_run_'+str(alignment_iteration-1)+'_'+wavelength+'.table'):
+            oldtable = np.genfromtxt('tables/Transient_'+region+'_run_'+str(alignment_iteration-1)+'_'+wavelength+'.table',dtype=None,names=True)
+            lastdx = oldtable['dx']
+            lastdy = oldtable['dy'] 
+        else:
+            lastdx = 0.0
+            lastdy = 0.0
+
         with open("data/data_Transient_run_"+str(alignment_iteration)+"_"+wavelength+".pickle", 'rb') as data:
             data = pickle.load(data)
         data=data[region]
@@ -45,8 +53,12 @@ def make_table(regions=['DR21C'],alignment_iteration=0,wavelength='850'):
             SIGY_err_850 = np.array(list(data['850']['AC']['sig_y_err'].values()), dtype=float)[np.argsort(keyarray)].T
             THETA_850 = np.array(list(data['850']['AC']['theta'].values()), dtype=float)[np.argsort(keyarray)].T
             THETA_err_850 = np.array(list(data['850']['AC']['theta_err'].values()), dtype=float)[np.argsort(keyarray)].T
-            dx = np.array(list(data['850']['XC']['alignment'].values()), dtype=float)[np.argsort(keyarray)].T[0] * 3
-            dy = np.array(list(data['850']['XC']['alignment'].values()), dtype=float)[np.argsort(keyarray)].T[1] * 3
+            #dx = np.array(list(data['850']['XC']['alignment'].values()), dtype=float)[np.argsort(keyarray)].T[0] * 3
+ 
+            # 2020-01-05 -- Flip the X axis based on tests looking at the pointing files and the generated images
+            # I really thought it was the Y-axis that should be reversed - but tests indicate it is the X-axis -- opposite to common sense
+            dx = lastdx+np.array(list(data['850']['XC']['alignment'].values()), dtype=float)[np.argsort(keyarray)].T[0] * -3
+            dy = lastdy+np.array(list(data['850']['XC']['alignment'].values()), dtype=float)[np.argsort(keyarray)].T[1] * 3
             key = np.array(sorted(list(data[wavelength]['header']['airmass'].keys())), dtype=str).T
 
             cal_measure_850 = np.sqrt(-M_850)
@@ -90,8 +102,11 @@ def make_table(regions=['DR21C'],alignment_iteration=0,wavelength='850'):
             SIGY_err_450 = np.array(list(data['450']['AC']['sig_y_err'].values()), dtype=float)[np.argsort(keyarray)].T
             THETA_450 = np.array(list(data['450']['AC']['theta'].values()), dtype=float)[np.argsort(keyarray)].T
             THETA_err_450 = np.array(list(data['450']['AC']['theta_err'].values()), dtype=float)[np.argsort(keyarray)].T
-            dx450 = np.array(list(data['450']['XC']['alignment'].values()), dtype=float)[np.argsort(keyarray)].T[0] * 2
-            dy450 = np.array(list(data['450']['XC']['alignment'].values()), dtype=float)[np.argsort(keyarray)].T[1] * 2
+            #dx450 = np.array(list(data['450']['XC']['alignment'].values()), dtype=float)[np.argsort(keyarray)].T[0] * 2
+            # 2020-01-05 -- Flip the X axis based on tests looking at the pointing files and the generated images
+            # I really thought it was the Y-axis that should be reversed - but tests indicate it is the X-axis -- opposite to common sense
+            dx450 = lastdx+np.array(list(data['450']['XC']['alignment'].values()), dtype=float)[np.argsort(keyarray)].T[0] * -2
+            dy450 = lastdy+np.array(list(data['450']['XC']['alignment'].values()), dtype=float)[np.argsort(keyarray)].T[1] * 2
             key = np.array(sorted(list(data[wavelength]['header']['airmass'].keys())), dtype=str).T
 
             M_450[M_450 > 0] = -0.0001

@@ -343,6 +343,7 @@ def make_data_dict(regions=['DR21C'],datadirs=['DR21C'],alignment_iteration=0,DI
         else:
             convert.ndf2fits(FilePath, OutPath)
         FilePath = OutPath
+        print('\n\nFIRST EPOCH: '+FilePath+'\n\n')
         FirstEpoch = fits.open(FilePath)  # opening the file in astropy
         FirstEpochData = FirstEpoch[0].data[0]  # Numpy data array for the first epoch
         FirstEpochCentre = np.array([FirstEpoch[0].header['CRPIX1'], FirstEpoch[0].header['CRPIX2']])
