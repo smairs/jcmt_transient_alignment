@@ -22,6 +22,8 @@ def make_pcor(tablefile):
                 pcorfile.write('10000000 '+str(eachdx)+' '+str(eachdy))
                 pcorfile.close()
                 print('POINTING FOR '+eachdate.decode('utf-8')+': '+str(eachdx)+', '+str(eachdy))
+    os.system('mkdir pointing_files_posterity')
+    os.system('cp *_pcor.txt pointing_files_posterity')
 
 def makemap_infiles(region,wave):
 
